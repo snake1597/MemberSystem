@@ -47,7 +47,7 @@ func ConnectDB(dbConfig DBConfig) {
 	sqlDB.SetConnMaxLifetime(time.Hour)
 }
 
-func CloseDB(db *gorm.DB) {
+func CloseDB() {
 
 	sqlDB, err := DB.DB()
 	if err != nil {

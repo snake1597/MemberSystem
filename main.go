@@ -15,7 +15,7 @@ func main() {
 	}
 
 	database.ConnectDB(dbconfig)
-	defer database.CloseDB(database.DB)
+	defer database.CloseDB()
 
 	routes.InitRoutes()
 }
