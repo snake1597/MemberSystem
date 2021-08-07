@@ -25,11 +25,12 @@ func Register(context *gin.Context) {
 	}
 	user.Password, _ = hashPassword(user.Password)
 
-	user.Insert(database.DB)
-	//result := database.DB.Create(&user)
-	// if result.Error != nil {
-	// 	println("Create failt")
-	// }
+	dbErr := user.Insert(database.DB)
+	if dbErr != nil {
+		context.JSON(http.StatusOK, gin.H{"status": http.StatusBadRequest, "message": "register is not succes", "content": dbErr.Error()})
+		return
+	}
+
 	context.JSON(http.StatusCreated, gin.H{"status": http.StatusCreated, "message": "member created successfully"})
 }
 
