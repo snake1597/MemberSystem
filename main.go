@@ -1,21 +1,33 @@
 package main
 
 import (
-	"MemberSystem/database"
-	"MemberSystem/routes"
+	// "MemberSystem/database"
+	// "MemberSystem/routes"
+
+	"github.com/spf13/viper"
 )
 
-func main() {
-	dbconfig := database.DBConfig{
-		User:     "root",
-		Password: "",
-		Host:     "127.0.0.1",
-		Port:     "3306",
-		DBName:   "arthur",
+func init() {
+
+	viper.SetConfigFile("config.yaml")
+	err := viper.ReadInConfig()
+	if err != nil {
+		panic(err)
 	}
+}
 
-	database.ConnectDB(dbconfig)
-	defer database.CloseDB()
+func main() {
 
-	routes.InitRoutes()
+	// dbconfig := database.DBConfig{
+	// 	User:     "root",
+	// 	Password: "",
+	// 	Host:     "127.0.0.1",
+	// 	Port:     "3306",
+	// 	DBName:   "arthur",
+	// }
+
+	//database.ConnectDB(dbconfig)
+	//defer database.CloseDB()
+
+	//routes.InitRoutes()
 }
