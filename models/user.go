@@ -14,16 +14,19 @@ type User struct {
 }
 
 func (user *User) Insert(db *gorm.DB) (err error) {
+
 	err = db.Create(&user).Error
 	return
 }
 
 func (user *User) Update(db *gorm.DB, account interface{}) (err error) {
+
 	err = db.Table("users").Where("account = ?", account).Updates(user).Error
 	return
 }
 
 func (user *User) FindOne(db *gorm.DB, account interface{}) (err error) {
+
 	err = db.Table("users").Where("account = ?", account).Find(&user).Error
 	return
 }

@@ -8,12 +8,13 @@ import (
 )
 
 func InitRoutes() {
+
 	router := gin.Default()
 
 	authGroup := router.Group("/api/v1")
 	{
-		authGroup.POST("/api/v1/register", controllers.Register)
-		authGroup.POST("/api/v1/login", controllers.Login)
+		authGroup.POST("/register", controllers.Register)
+		authGroup.POST("/login", controllers.Login)
 	}
 
 	userGroup := router.Group("/api/v1/users").Use(middlewares.ParseToken())

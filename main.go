@@ -1,8 +1,8 @@
 package main
 
 import (
-	// "MemberSystem/database"
-	// "MemberSystem/routes"
+	"MemberSystem/database"
+	"MemberSystem/routes"
 
 	"github.com/spf13/viper"
 )
@@ -18,16 +18,16 @@ func init() {
 
 func main() {
 
-	// dbconfig := database.DBConfig{
-	// 	User:     "root",
-	// 	Password: "",
-	// 	Host:     "127.0.0.1",
-	// 	Port:     "3306",
-	// 	DBName:   "arthur",
-	// }
+	dbconfig := database.DBConfig{
+		User:     viper.GetString("database.user"),
+		Password: viper.GetString("database.password"),
+		Host:     viper.GetString("database.host"),
+		Port:     viper.GetString("database.port"),
+		DBName:   viper.GetString("database.name"),
+	}
 
-	//database.ConnectDB(dbconfig)
-	//defer database.CloseDB()
+	database.ConnectDB(dbconfig)
+	defer database.CloseDB()
 
-	//routes.InitRoutes()
+	routes.InitRoutes()
 }

@@ -3,15 +3,13 @@ package controllers
 import (
 	"net/http"
 	"strings"
-	"time"
 
 	"MemberSystem/database"
-	"MemberSystem/middlewares"
 	"MemberSystem/models"
+	"MemberSystem/services"
+	"MemberSystem/tools"
 
-	"github.com/dgrijalva/jwt-go"
 	"github.com/gin-gonic/gin"
-	"golang.org/x/crypto/bcrypt"
 )
 
 func Register(context *gin.Context) {
@@ -23,7 +21,7 @@ func Register(context *gin.Context) {
 		context.JSON(http.StatusBadRequest, gin.H{"error": "registration information is not complete"})
 		return
 	}
-	user.Password, _ = hashPassword(user.Password)
+	user.Password, _ = tools.HashString(user.Password)
 
 	dbErr := user.Insert(database.DB)
 	if dbErr != nil {
@@ -49,11 +47,9 @@ func Login(context *gin.Context) {
 
 	auth := context.Request.Header.Get("Authorization")
 	if auth != "" {
-		authToken := strings.Split(auth, "Bearer ")[1]
+		token := strings.Split(auth, "Bearer ")[1]
 
-		_, err := jwt.Parse(authToken, func(token *jwt.Token) (i interface{}, e error) {
-			return middlewares.SecretKey, nil
-		})
+		_, err := services.ValidateToken(token)
 		if err != nil {
 			context.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"message": "invalid token", "status": http.StatusUnauthorized})
 			context.Abort()
@@ -65,34 +61,14 @@ func Login(context *gin.Context) {
 
 	row := database.DB.Table("users").Where("account = ?", user.Account).Select("password, name, id").Row()
 	row.Scan(&pwFromDB, &userName, &id)
-	verify := verifyPassword(user.Password, pwFromDB)
-	if verify {
-		token := jwt.New(jwt.SigningMethodHS256)
-		claims := make(jwt.MapClaims)
-		claims["id"] = id
-		claims["account"] = user.Account
-		claims["name"] = userName
-		claims["iat"] = time.Now().Unix()
-		token.Claims = claims
-		tokenString, err := token.SignedString([]byte(middlewares.SecretKey))
-		if err != nil {
-			context.JSON(http.StatusInternalServerError, gin.H{"status": http.StatusInternalServerError, "message": "JWT token failed"})
-		}
-		context.JSON(http.StatusOK, gin.H{"status": http.StatusOK, "message": "login successfully", "token": tokenString})
-		return
+	errVerify := tools.VerifyHashString(user.Password, pwFromDB)
+	if errVerify != nil {
+		context.JSON(http.StatusOK, gin.H{"status": http.StatusBadRequest, "message": "invalid password"})
 	}
 
-	context.JSON(http.StatusUnauthorized, gin.H{"message": "login failed", "status": http.StatusUnauthorized})
-}
-
-func hashPassword(pw string) (string, error) {
-
-	bytes, err := bcrypt.GenerateFromPassword([]byte(pw), 12)
-	return string(bytes), err
-}
-
-func verifyPassword(pw, hash string) bool {
-
-	err := bcrypt.CompareHashAndPassword([]byte(hash), []byte(pw))
-	return err == nil
+	authToken, err := services.GenerateToken(id, user.Account)
+	if err != nil {
+		context.JSON(http.StatusInternalServerError, gin.H{"status": http.StatusInternalServerError, "message": "JWT token failed"})
+	}
+	context.JSON(http.StatusOK, gin.H{"status": http.StatusOK, "message": "login successfully", "token": authToken})
 }
