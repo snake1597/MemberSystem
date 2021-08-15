@@ -18,8 +18,8 @@ func ParseToken() gin.HandlerFunc {
 
 		token := strings.Split(auth, "Bearer ")[1]
 		tokenInfo, err := services.ValidateToken(token)
-		if err == nil {
-			context.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"status": http.StatusUnauthorized, "message": "token is invalid"})
+		if err != nil {
+			context.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"status": http.StatusUnauthorized, "message": err.Error()})
 			return
 		}
 		context.Set("id", tokenInfo["id"])

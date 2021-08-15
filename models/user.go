@@ -21,7 +21,7 @@ func (user *User) Insert(db *gorm.DB) (err error) {
 
 func (user *User) Update(db *gorm.DB, account interface{}) (err error) {
 
-	err = db.Table("users").Where("account = ?", account).Updates(user).Error
+	err = db.Table("users").Where("account = ?", account).Updates(map[string]interface{}{"name": user.Name, "birthday": user.Birthday}).Error
 	return
 }
 
